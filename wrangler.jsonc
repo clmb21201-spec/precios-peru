@@ -1,0 +1,23 @@
+{
+  // Precios del Perú · ECData, Economía y Núcleo Audiovisual
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "precios-peru",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/lector", "/lector/", "/api/*"]
+  },
+  // El robot: 9:00, 11:00, 12:00 y 15:00 hora de Lima (UTC-5).
+  "triggers": {
+    "crons": ["0 14 * * *", "0 16 * * *", "0 17 * * *", "0 20 * * *"]
+  },
+  // Donde se guarda la lista de cada día. Cloudflare la crea sola al publicar.
+  "kv_namespaces": [{ "binding": "DATOS" }],
+  "durable_objects": {
+    "bindings": [{ "name": "SALA", "class_name": "Sala" }, { "name": "ROBOT", "class_name": "Robot" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Sala", "Robot"] }],
+  "observability": { "enabled": true }
+}

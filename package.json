@@ -1,0 +1,12 @@
+{
+  "name": "precios-peru",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "publicar": "wrangler deploy",
+    "probar": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.40.0"
+  }
+}

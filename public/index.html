@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Precios del Perú · mercados minoristas</title>
+<meta name="description" content="Cuánto costaba y cuánto cuesta hoy cada producto en los mercados minoristas de 28 ciudades del Perú. Fuente: SISAP – Midagri.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;600&display=swap">
+<link rel="stylesheet" href="/estilos.css">
+<link rel="icon" href="/iconos/canasta.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="pagina">
+<div class="contenedor">
+<div class="marco">
+<div class="pizarra">
+<header class="cabecera">
+<span id="modo" class="modo"><span class="luz"></span><span id="modo-texto">Cargando…</span></span>
+<p class="antetitulo">Precio en mercados minoristas</p>
+<h1 class="titulo">PRECIOS DEL PERÚ</h1>
+<p class="subtitulo">Toca una ciudad del mapa para ver sus precios</p>
+</header>
+
+<div class="cuerpo">
+<div class="col-mapa">
+<div class="mapa" id="mapa">
+<img src="/img/peru.svg" alt="Mapa del Perú por regiones">
+</div>
+<div class="elegir">
+<label for="region">O elige tu región</label>
+<select id="region"><option value="">Selecciona una región…</option></select>
+</div>
+</div>
+<div class="col-panel" id="panel" aria-live="polite"></div>
+</div>
+
+<div class="creditos">
+<p>Fuente: SISAP – Midagri · Elaboración:</p>
+<span class="grupo"><img src="/img/ecdata.png" alt="ECData" width="92" height="19"><p>, Economía</p></span>
+<p>y Núcleo Audiovisual</p>
+</div>
+</div>
+</div>
+<p class="pie" id="pie">Precios en soles, promedio de los mercados minoristas de cada ciudad.</p>
+</div>
+</div>
+<script src="/ciudades.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
