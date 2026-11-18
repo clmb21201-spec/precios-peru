@@ -11,10 +11,30 @@ async function huella(t) {
 const JSON_H = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: JSON_H });
 
+async function subir(request, url, env, desdeSisap) {
+  if (!desdeSisap) {
+    const clave = request.headers.get('x-clave') || '';
+    if (!clave || (await huella(clave)) !== HUELLA_CLAVE) return json({ error: 'clave incorrecta' }, 403);
+  }
+  const fecha = url.searchParams.get('fecha') || '';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || fecha > fechaLima(1) || fecha < fechaLima(-10)) return json({ error: 'fecha inválida' }, 400);
+  let cuerpo;
+  try { cuerpo = await request.json(); } catch { return json({ error: 'datos inválidos' }, 400); }
+  return json(await guardarSubida(env, fecha, cuerpo && cuerpo.ciudades));
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const p = url.pathname.replace(/\/+$/, '') || '/';
+    const ORIGEN_SISAP = 'http://sistemas.midagri.gob.pe';
+    const origen = request.headers.get('origin') || '';
+    const cors = origen === ORIGEN_SISAP ? {
+      'access-control-allow-origin': ORIGEN_SISAP,
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
+      'access-control-allow-headers': 'content-type',
+      'access-control-max-age': '86400'
+    } : {};
 
     // Las dos páginas: el visualizador (sincronizado) y el lector (independiente).
     if (p === '/' || p === '/lector') {
@@ -23,7 +43,9 @@ export default {
 
     if (p === '/api/dias') {
       const dias = (await env.DATOS.get('dias', 'json')) || [];
-      return json({ dias, hoy: fechaLima(0) });
+      const res = json({ dias, hoy: fechaLima(0) });
+      for (const [k, v] of Object.entries(cors)) res.headers.set(k, v);
+      return res;
     }
 
     if (p === '/api/comparar') {
@@ -37,16 +59,17 @@ export default {
       return json((await env.DATOS.get('ultimo', 'json')) || {});
     }
 
-    // El robot de la computadora sube aquí los precios que leyó del SISAP.
-    if (p === '/api/subir' && request.method === 'POST') {
-      const clave = request.headers.get('x-clave') || '';
-      if (!clave || (await huella(clave)) !== HUELLA_CLAVE) return json({ error: 'clave incorrecta' }, 403);
-      const fecha = url.searchParams.get('fecha') || '';
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || fecha > fechaLima(1) || fecha < fechaLima(-10)) return json({ error: 'fecha inválida' }, 400);
-      let cuerpo;
-      try { cuerpo = await request.json(); } catch { return json({ error: 'datos inválidos' }, 400); }
-      return json(await guardarSubida(env, fecha, cuerpo && cuerpo.ciudades));
+    // El robot sube aquí los precios que leyó del SISAP: desde la propia página del SISAP
+    // en Chrome (se reconoce por su origen) o desde una computadora con la clave.
+    if ((p === '/api/subir' || p === '/api/dias') && request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: cors });
     }
+    if (p === '/api/subir' && request.method === 'POST') {
+      const res = await subir(request, url, env, origen === ORIGEN_SISAP);
+      for (const [k, v] of Object.entries(cors)) res.headers.set(k, v);
+      return res;
+    }
+
 
     // Sala compartida del visualizador.
     if (p === '/api/sala') {
