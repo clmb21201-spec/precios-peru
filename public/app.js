@@ -95,8 +95,9 @@
     var lista = [];
     Object.keys(mapa).forEach(function (k) {
       var it = mapa[k];
-      if (it.ahora === null && it.antes === null) return;
-      if (it.ahora === null || it.antes === null) { it.dir = 'nodato'; it.d = 0; }
+      // Sin precio de hoy, el producto no se muestra.
+      if (it.ahora === null) return;
+      if (it.antes === null) { it.dir = 'nodato'; it.d = 0; }
       else { it.d = it.ahora - it.antes; it.dir = Math.abs(it.d) < 0.005 ? 'igual' : (it.d > 0 ? 'sube' : 'baja'); }
       lista.push(it);
     });
