@@ -1,4 +1,12 @@
-import { correrRobot, fechaLima, actualizarDia, comparar, consultarRegion, SISAP_BASE } from './sisap.js';
+import { correrRobot, fechaLima, actualizarDia, comparar, consultarRegion, SISAP_BASE, guardarSubida } from './sisap.js';
+
+// Huella de la clave del robot de la computadora (la clave misma está solo en robot.ps1).
+const HUELLA_CLAVE = '42705b7883d21bc8db74c7345c1df58311bd95d00491821684c85ca6d6a242cf';
+
+async function huella(t) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
 
 const JSON_H = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: JSON_H });
@@ -29,15 +37,15 @@ export default {
       return json((await env.DATOS.get('ultimo', 'json')) || {});
     }
 
-    // Para la primera carga o una revisión manual. Como máximo una vez cada 10 minutos.
-    if (p === '/api/actualizar') {
-      const ult = await env.DATOS.get('ultimo', 'json');
-      if (ult && Date.now() - Date.parse(ult.cuando) < 10 * 60e3) {
-        return json({ mensaje: 'El robot ya corrió hace menos de 10 minutos.', ultimo: ult });
-      }
-      await env.DATOS.put('ultimo', JSON.stringify({ cuando: new Date().toISOString(), resultados: 'en curso' }));
-      ctx.waitUntil(correrRobot(env));
-      return json({ mensaje: 'Robot en marcha. Los precios aparecerán en uno o dos minutos.' });
+    // El robot de la computadora sube aquí los precios que leyó del SISAP.
+    if (p === '/api/subir' && request.method === 'POST') {
+      const clave = request.headers.get('x-clave') || '';
+      if (!clave || (await huella(clave)) !== HUELLA_CLAVE) return json({ error: 'clave incorrecta' }, 403);
+      const fecha = url.searchParams.get('fecha') || '';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || fecha > fechaLima(1) || fecha < fechaLima(-10)) return json({ error: 'fecha inválida' }, 400);
+      let cuerpo;
+      try { cuerpo = await request.json(); } catch { return json({ error: 'datos inválidos' }, 400); }
+      return json(await guardarSubida(env, fecha, cuerpo && cuerpo.ciudades));
     }
 
     // Sala compartida del visualizador.

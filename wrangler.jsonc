@@ -9,10 +9,8 @@
     "binding": "ASSETS",
     "run_worker_first": ["/", "/lector", "/lector/", "/api/*"]
   },
-  // El robot: 9:00, 11:00, 12:00 y 15:00 hora de Lima (UTC-5).
-  "triggers": {
-    "crons": ["0 14 * * *", "0 16 * * *", "0 17 * * *", "0 20 * * *"]
-  },
+  // El robot corre en una computadora en el Perú (el SISAP no acepta conexiones de Cloudflare)
+  // y sube los precios a /api/subir. Por eso aquí no hay tareas programadas.
   // Donde se guarda la lista de cada día. Cloudflare la crea sola al publicar.
   "kv_namespaces": [{ "binding": "DATOS" }],
   "durable_objects": {

@@ -63,7 +63,7 @@ export async function consultarRegion(base, region, fechaISO) {
 }
 
 // Une lo nuevo con lo guardado: un precio que ya teníamos no se pierde si luego sale en blanco.
-function unir(viejo, nuevo) {
+export function unir(viejo, nuevo) {
   if (!nuevo) return viejo || null;
   if (!viejo) return nuevo;
   const mapa = new Map(viejo.map(p => [p[0], p]));
@@ -164,4 +164,34 @@ export async function comparar(env, fecha) {
     ciudades[c] = { hoy: lista, antes };
   }
   return { fecha, actualizado: actual.actualizado, ciudades };
+}
+
+// Guarda los precios que manda el robot de la computadora (en el Perú).
+export async function guardarSubida(env, fechaISO, ciudades) {
+  const clave = 'dia:' + fechaISO;
+  const guardado = (await env.DATOS.get(clave, 'json')) || { fecha: fechaISO, ciudades: {} };
+  const validas = new Set(REGIONES.map(r => r[1]));
+  let n = 0;
+  for (const [c, filas] of Object.entries(ciudades || {})) {
+    if (!validas.has(c) || !Array.isArray(filas)) continue;
+    const limpias = filas
+      .filter(f => Array.isArray(f) && typeof f[0] === 'string' && f[0].length < 120)
+      .map(f => [f[0], typeof f[1] === 'string' ? f[1].slice(0, 30) : '', (typeof f[2] === 'number' && isFinite(f[2]) && f[2] >= 0 && f[2] < 10000) ? f[2] : null])
+      .slice(0, 200);
+    if (!limpias.length) continue;
+    const unido = unir(guardado.ciudades[c], limpias);
+    if (unido) { guardado.ciudades[c] = unido; n++; }
+  }
+  if (!Object.keys(guardado.ciudades).length) return { fecha: fechaISO, ciudadesRecibidas: 0 };
+  guardado.actualizado = new Date().toISOString();
+  await env.DATOS.put(clave, JSON.stringify(guardado));
+  const dias = (await env.DATOS.get('dias', 'json')) || [];
+  if (!dias.includes(fechaISO)) {
+    dias.push(fechaISO);
+    dias.sort();
+    await env.DATOS.put('dias', JSON.stringify(dias.slice(-120)));
+  }
+  const res = { fecha: fechaISO, ciudadesRecibidas: n, ciudadesConDatos: Object.keys(guardado.ciudades).length };
+  await env.DATOS.put('ultimo', JSON.stringify({ cuando: new Date().toISOString(), origen: 'computadora', resultados: [res] }));
+  return res;
 }
