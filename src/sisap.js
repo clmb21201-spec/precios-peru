@@ -52,7 +52,7 @@ export function leerTabla(html) {
   return out.length ? out : null;
 }
 
-async function consultarRegion(base, region, fechaISO) {
+export async function consultarRegion(base, region, fechaISO) {
   const r = await fetch(urlConsulta(base, region, fechaISO), {
     headers: { 'User-Agent': 'Mozilla/5.0 (precios GEC; consulta 4 veces al dia)', 'X-Requested-With': 'XMLHttpRequest' },
     cf: { cacheTtl: 0 }
@@ -79,15 +79,19 @@ export function fechaLima(desfaseDias = 0) {
   return new Date(t).toISOString().slice(0, 10);
 }
 
-export async function actualizarDia(env, fechaISO) {
-  const base = env.SISAP_URL || 'http://sistemas.midagri.gob.pe/sisap/portal2/ciudades';
+export const SISAP_BASE = 'http://sistemas.midagri.gob.pe/sisap/portal2/ciudades';
+
+// consultar(codigoRegion) devuelve la tabla leída de esa ciudad (o null).
+export async function actualizarDia(env, fechaISO, consultar) {
+  const base = env.SISAP_URL || SISAP_BASE;
+  consultar = consultar || (cod => consultarRegion(base, cod, fechaISO));
   const clave = 'dia:' + fechaISO;
   const guardado = (await env.DATOS.get(clave, 'json')) || { fecha: fechaISO, ciudades: {} };
   let ok = 0, fallos = 0;
   // De a 4 ciudades a la vez para no saturar al SISAP.
   for (let k = 0; k < REGIONES.length; k += 4) {
     const lote = REGIONES.slice(k, k + 4);
-    const res = await Promise.allSettled(lote.map(([cod]) => consultarRegion(base, cod, fechaISO)));
+    const res = await Promise.allSettled(lote.map(([cod]) => consultar(cod)));
     res.forEach((r, j) => {
       const ciudad = lote[j][1];
       if (r.status === 'fulfilled') {

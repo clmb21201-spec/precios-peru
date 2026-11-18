@@ -1,4 +1,4 @@
-import { correrRobot, fechaLima, actualizarDia, comparar } from './sisap.js';
+import { correrRobot, fechaLima, actualizarDia, comparar, consultarRegion, SISAP_BASE } from './sisap.js';
 
 const JSON_H = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: JSON_H });
@@ -94,7 +94,8 @@ export class Sala {
   }
 }
 
-// Consulta un solo día del SISAP. Cloudflare lo corre aparte de quien lo llama.
+// El robot. Con «fecha» arma el día completo; con «fecha» y «region» consulta una sola ciudad.
+// Cada parte corre aparte, para no pasar los límites del plan gratuito.
 export class Robot {
   constructor(state, env) {
     this.state = state;
@@ -102,11 +103,27 @@ export class Robot {
   }
 
   async fetch(request) {
-    const fecha = new URL(request.url).searchParams.get('fecha') || '';
+    const q = new URL(request.url).searchParams;
+    const fecha = q.get('fecha') || '';
+    const region = q.get('region') || '';
     if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return json({ error: 'fecha inválida' }, 400);
+
+    if (region) {
+      if (!/^\d{6}$/.test(region)) return json({ error: 'región inválida' }, 400);
+      const filas = await consultarRegion(this.env.SISAP_URL || SISAP_BASE, region, fecha);
+      return json({ filas });
+    }
+
     const ult = (await this.state.storage.get('ultimo')) || 0;
     if (Date.now() - ult < 9 * 60e3) return json({ fecha, omitido: 'consultado hace menos de 10 minutos' });
     await this.state.storage.put('ultimo', Date.now());
-    return json(await actualizarDia(this.env, fecha));
+    const env = this.env;
+    const consultar = async cod => {
+      const r = await env.ROBOT.get(env.ROBOT.idFromName('c:' + fecha + ':' + cod))
+        .fetch('https://robot/?fecha=' + fecha + '&region=' + cod);
+      if (!r.ok) throw new Error('falló ' + cod);
+      return (await r.json()).filas;
+    };
+    return json(await actualizarDia(env, fecha, consultar));
   }
 }
