@@ -1,5 +1,5 @@
 // Robot de precios para correr DENTRO de la página del SISAP (http://sistemas.midagri.gob.pe/sisap/portal2/ciudades/),
-// en un navegador en el Perú. Lee el precio minorista promedio de las 28 ciudades y lo sube a la web.
+// en un navegador en el Perú. Lee el precio mayorista promedio de las 28 ciudades y lo sube a la web.
 // Uso: en la consola de esa página, cargar este archivo y ejecutar. El avance queda en window.__robot.
 (function () {
   var WEB = 'https://precios-peru.ecproyectos.workers.dev';
@@ -31,7 +31,7 @@
   function fechaLima(k) { return new Date(Date.now() - 5 * 3600e3 + k * 86400e3).toISOString().slice(0, 10); }
   function url(cod, iso) {
     var p = iso.split('-');
-    return '/sisap/portal2/ciudades/resumenes/filtrar?region=' + cod + '&variables[]=min_precio_prom&fecha=' + p[2] + '/' + p[1] + '/' + p[0] +
+    return '/sisap/portal2/ciudades/resumenes/filtrar?region=' + cod + '&variables[]=may_precio_prom&fecha=' + p[2] + '/' + p[1] + '/' + p[0] +
       '&' + PRODUCTOS.map(function (c) { return 'productos[]=' + c; }).join('&') + '&periodicidad=dia&__ajax_carga_final=consulta&ajax=true';
   }
   async function ciudad(cod, iso) {
