@@ -1,4 +1,4 @@
-// Robot que consulta el SISAP (Midagri) y guarda el precio minorista promedio del día.
+// Robot que consulta el SISAP (Midagri) y guarda el precio mayorista promedio del día.
 
 export const REGIONES = [
   ['010000', 'amazonas'], ['020000', 'ancash'], ['030000', 'apurimac'], ['030201', 'andahuaylas'],
@@ -19,7 +19,7 @@ export function urlConsulta(base, region, fechaISO) {
   const [a, m, d] = fechaISO.split('-');
   const p = new URLSearchParams();
   p.append('region', region);
-  p.append('variables[]', 'min_precio_prom');
+  p.append('variables[]', 'may_precio_prom');
   p.append('fecha', `${d}/${m}/${a}`);
   for (const c of PRODUCTOS) p.append('productos[]', c);
   p.append('periodicidad', 'dia');
