@@ -144,7 +144,7 @@
     var pie = document.getElementById('pie');
     if (d && d.actualizado) {
       var t = new Date(d.actualizado);
-      pie.textContent = 'Precios en soles, promedio de los mercados minoristas de cada ciudad. Última revisión del robot: ' +
+      pie.textContent = 'Precios en soles, promedio de los mercados mayoristas de cada ciudad. Última revisión del robot: ' +
         t.toLocaleString('es-PE', { timeZone: 'America/Lima', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }).replace(/\.$/, '') + '.';
     }
 
@@ -153,7 +153,7 @@
       return;
     }
     if (!estado.sel || !POR_CLAVE[estado.sel]) {
-      panel.innerHTML = vacio('Elige una ciudad', 'Cada punto es una ciudad con mercados minoristas. Al tocarla verás cuánto costaba cada producto y cuánto cuesta ahora.',
+      panel.innerHTML = vacio('Elige una ciudad', 'Cada punto es una ciudad con mercados mayoristas. Al tocarla verás cuánto costaba cada producto y cuánto cuesta ahora.',
         d ? conDatos.length + ' ciudades con precios el ' + largo(estado.fecha) : 'Cargando…');
       return;
     }
@@ -172,7 +172,7 @@
       return;
     }
     if (!f || !f.lista.length) {
-      panel.innerHTML = html + vacioCorto(c[2] + ' no reportó precios minoristas este día. Prueba con otra fecha.');
+      panel.innerHTML = html + vacioCorto(c[2] + ' no reportó precios mayoristas este día. Prueba con otra fecha.');
       return;
     }
     var cuenta = { todos: f.lista.length, sube: 0, baja: 0, igual: 0, nodato: 0 };
