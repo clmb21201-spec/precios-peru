@@ -55,6 +55,15 @@ export default {
       return d ? json(d) : json({ error: 'sin datos' }, 404);
     }
 
+    // Limpieza única: borra los días que se guardaron con precio minorista (antes del cambio a mayorista).
+    if (p === '/api/limpiar-minorista') {
+      const viejos = ['2026-11-11', '2026-11-13', '2026-11-16', '2026-11-18'];
+      for (const d of viejos) await env.DATOS.delete('dia:' + d);
+      const dias = ((await env.DATOS.get('dias', 'json')) || []).filter(d => !viejos.includes(d));
+      await env.DATOS.put('dias', JSON.stringify(dias));
+      return json({ borrados: viejos, quedan: dias });
+    }
+
     if (p === '/api/estado-robot') {
       return json((await env.DATOS.get('ultimo', 'json')) || {});
     }
