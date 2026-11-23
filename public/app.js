@@ -90,7 +90,9 @@
     hoyL.forEach(function (p) { mapa[p[0]] = { nombre: p[0], unidad: p[1], ahora: p[2], antes: null }; });
     if (antes) antes.productos.forEach(function (p) {
       if (!mapa[p[0]]) mapa[p[0]] = { nombre: p[0], unidad: p[1], ahora: null, antes: p[2] };
-      else { mapa[p[0]].antes = p[2]; if (!mapa[p[0]].unidad) mapa[p[0]].unidad = p[1]; }
+      else if (!mapa[p[0]].unidad || !p[1] || mapa[p[0]].unidad === p[1]) { mapa[p[0]].antes = p[2]; if (!mapa[p[0]].unidad) mapa[p[0]].unidad = p[1]; }
+      // Si la unidad cambió (p. ej. kilo vs. saco), no se compara.
+      else mapa[p[0]].antes = null;
     });
     var lista = [];
     Object.keys(mapa).forEach(function (k) {

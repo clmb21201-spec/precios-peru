@@ -4,7 +4,7 @@ Esta carpeta contiene la web completa:
 
 - **Visualizador** (`https://TU-DIRECCIÓN/`): todas las pantallas abiertas ven lo mismo. Si alguien elige una ciudad, cambia de página o de filtro, el cambio aparece en todas las demás.
 - **Lector** (`https://TU-DIRECCIÓN/lector`): cada persona lo usa por su cuenta, sin afectar a nadie.
-- **Robot**: consulta el SISAP del Midagri a las 9:00, 11:00, 12:00 y 15:00 (hora de Lima). Toma el precio minorista promedio de las 28 ciudades y guarda la lista del día. Si un precio sale en blanco en una consulta, lo vuelve a buscar en la siguiente. Cada ciudad se compara con el último día anterior en que reportó precios, porque el SISAP no publica todos los días.
+- **Robot**: consulta el SISAP del Midagri a las 9:00, 11:00, 12:00 y 15:00 (hora de Lima). Toma el precio mayorista promedio de las 28 ciudades y guarda la lista del día. Si un precio sale en blanco en una consulta, lo vuelve a buscar en la siguiente. Cada ciudad se compara solo con el día anterior; si ese día no hubo precios, o si el producto cambió de unidad, no se muestra comparación.
 
 ## Publicar desde GitHub (sin terminal)
 

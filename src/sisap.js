@@ -153,7 +153,9 @@ export async function comparar(env, fecha) {
   };
   const actual = await leer(fecha);
   if (!actual) return null;
-  const previos = dias.filter(d => d < fecha).reverse().slice(0, 14);
+  // Solo se compara con el día anterior del calendario; si ese día no hay datos, no hay comparación.
+  const ayer = new Date(Date.parse(fecha + 'T12:00:00Z') - 86400e3).toISOString().slice(0, 10);
+  const previos = dias.filter(d => d === ayer);
   const ciudades = {};
   for (const [c, lista] of Object.entries(actual.ciudades)) {
     let antes = null;
