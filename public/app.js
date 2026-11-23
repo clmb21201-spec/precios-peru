@@ -166,7 +166,7 @@
     }
     if (!estado.sel || !POR_CLAVE[estado.sel]) {
       panel.innerHTML = vacio('Elige una ciudad', 'Cada punto es una ciudad con mercados mayoristas. Al tocarla verás cuánto costaba cada producto y cuánto cuesta ahora.',
-        d ? conDatos.length + ' ciudades con precios de este día y del anterior (' + largo(estado.fecha) + ')' : 'Cargando…');
+        d ? (conDatos.length === 1 ? '1 ciudad' : conDatos.length + ' ciudades') + ' con precios de este día y del anterior (' + largo(estado.fecha) + ')' : 'Cargando…');
       return;
     }
     var c = POR_CLAVE[estado.sel];
