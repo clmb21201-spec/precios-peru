@@ -133,13 +133,23 @@
 
   function pintar() {
     var d = datos[estado.fecha];
-    var conDatos = d ? Object.keys(d.ciudades).filter(function (k) { return d.ciudades[k].hoy && d.ciudades[k].hoy.some(function (p) { return p[2] !== null; }); }) : [];
+    // Solo se habilitan las ciudades que tienen lista de hoy y lista del día anterior.
+    var conDatos = d ? Object.keys(d.ciudades).filter(function (k) {
+      var x = d.ciudades[k];
+      return x.hoy && x.hoy.some(function (p) { return p[2] !== null; }) &&
+        x.antes && x.antes.productos && x.antes.productos.some(function (p) { return p[2] !== null; });
+    }) : [];
     // Puntos
     Array.prototype.forEach.call(mapaEl.querySelectorAll('.punto'), function (b) {
       var c = b.dataset.c;
       b.classList.toggle('activo', c === estado.sel);
-      b.classList.toggle('sindatos', !!d && conDatos.indexOf(c) === -1);
+      var apagada = !!d && conDatos.indexOf(c) === -1;
+      b.classList.toggle('sindatos', apagada);
+      b.disabled = apagada && c !== estado.sel;
       if (c === estado.sel) b.setAttribute('aria-pressed', 'true'); else b.removeAttribute('aria-pressed');
+    });
+    Array.prototype.forEach.call(selectEl.options, function (o) {
+      if (o.value) o.disabled = !!d && conDatos.indexOf(o.value) === -1 && o.value !== estado.sel;
     });
     selectEl.value = estado.sel || '';
 
@@ -156,7 +166,7 @@
     }
     if (!estado.sel || !POR_CLAVE[estado.sel]) {
       panel.innerHTML = vacio('Elige una ciudad', 'Cada punto es una ciudad con mercados mayoristas. Al tocarla verás cuánto costaba cada producto y cuánto cuesta ahora.',
-        d ? conDatos.length + ' ciudades con precios el ' + largo(estado.fecha) : 'Cargando…');
+        d ? conDatos.length + ' ciudades con precios de este día y del anterior (' + largo(estado.fecha) + ')' : 'Cargando…');
       return;
     }
     var c = POR_CLAVE[estado.sel];
@@ -169,6 +179,10 @@
       '<button type="button" data-acc="diaSig" aria-label="Día siguiente"' + (idx >= dias.length - 1 ? ' disabled' : '') + '>' + FLECHA_D + '</button></div>';
 
     var f = d ? filas(estado.sel) : null;
+    if (d && conDatos.indexOf(estado.sel) === -1) {
+      panel.innerHTML = html + vacioCorto(c[2] + ' no tiene precios de este día y del día anterior para comparar. Prueba con otra ciudad u otra fecha.');
+      return;
+    }
     if (!d) {
       panel.innerHTML = html + vacioCorto('Cargando precios…');
       return;

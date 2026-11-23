@@ -25,6 +25,8 @@ select:focus-visible, button:focus-visible { outline: 3px solid #F5D76E; outline
 .punto { position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; }
 .punto .dot { width: 13px; height: 13px; border-radius: 50%; background: #F3F1EA; box-shadow: 0 0 0 3px rgba(35,63,49,.9); display: block; transition: transform .15s; }
 .punto.sindatos .dot { background: #6F8676; }
+.punto[disabled] { cursor: default; }
+.punto[disabled]:hover .dot { transform: none; }
 .punto .etq { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #F3F1EA; color: #1E2A22; font-size: 15px; font-weight: 700; line-height: 1; padding: 5px 8px 3px; border-radius: 4px; opacity: 0; transition: opacity .15s; pointer-events: none; }
 .punto:hover .etq, .punto:focus-visible .etq { opacity: 1; }
 .punto:hover .dot, .punto:focus-visible .dot { transform: scale(1.4); }
